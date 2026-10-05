@@ -36,25 +36,40 @@ for b in batches(syms, 500):
     cands += list(last[(last >= 1) & (last <= 5)].index)
 print("أسهم بين 1 و5 دولار:", len(cands))
 
-_dbg = [True]
-def borrow_avail(sym):
-    """الأسهم المتاحة للشورت من iBorrowDesk (API غير رسمي). -1 = غير متوفر"""
+import ftplib
+def load_ib():
+    """الشورت المتاح من FTP العام لـ Interactive Brokers (نفس مصدر iBorrowDesk، يتحدث كل 15 دقيقة)"""
     try:
-        req = urllib.request.Request("https://iborrowdesk.com/api/ticker/" + sym,
-                                     headers={"User-Agent": "Mozilla/5.0"})
-        raw = urllib.request.urlopen(req, timeout=20).read().decode()
-        if _dbg[0]:
-            print("iBorrowDesk نموذج:", raw[:300]); _dbg[0] = False
-        d = json.loads(raw)
-        items = d.get("real_time") or d.get("daily") or []
-        if not items:
-            return -1
-        it = max(items, key=lambda x: str(x.get("time") or x.get("date") or ""))
-        return int(it.get("available", -1))
+        ftp = ftplib.FTP("ftp2.interactivebrokers.com", timeout=60)
+        ftp.login("shortstock", "")
+        files = ftp.nlst()
+        print("ملفات IB:", files[:15])
+        name = next((f for f in files if f.lower().startswith("usa")), None)
+        if not name:
+            print("ما لقيت ملف usa في IB")
+            return {}
+        buf = io.BytesIO()
+        ftp.retrbinary("RETR " + name, buf.write)
+        ftp.quit()
+        out, idx = {}, 7
+        for line in buf.getvalue().decode("utf-8", "ignore").splitlines():
+            if line.startswith("#SYM"):
+                cols = line.lstrip("#").split("|")
+                idx = cols.index("AVAILABLE") if "AVAILABLE" in cols else 7
+                continue
+            if not line or line.startswith("#"):
+                continue
+            c = line.split("|")
+            if len(c) <= idx:
+                continue
+            m = re.sub(r"[^\d]", "", c[idx])
+            if m:
+                out[c[0].strip()] = int(m)
+        print("IB: عدد الأسهم في الملف", len(out))
+        return out
     except Exception as e:
-        if _dbg[0]:
-            print("iBorrowDesk خطأ:", e); _dbg[0] = False
-        return -1
+        print("IB FTP فشل:", e)
+        return {}
 
 def ema(s, k): return s.ewm(span=k, adjust=False).mean()
 
@@ -112,16 +127,18 @@ for b in batches(cands, 100):
                              stable_days=stable, rebound=round(reb, 1), tested=tested, confirmed=confirmed,
                              rsi=round(float(rs.iloc[-1]), 1), split_ratio=split_ratio, split_date=split_date,
                              dd=round(dd, 1), ema_ok=ema_ok, rsi_min=round(rsi_min, 1), macd_x=macd_x,
-                             gap=round(gap, 1), short_avail=-1, news_n=0, rise20=round(rise20, 1), macd_pos=macd_pos))
+                             gap=round(gap, 1), short_avail=-1, news_n=0, rise20=round(rise20, 1), macd_pos=macd_pos, short_src=""))
         except Exception:
             pass
 
 # الشورت والأخبار: فقط للأسهم اللي حققت الشروط الفنية الخمسة (توفيرًا للوقت)
-# الشورت المتاح لكل الأسهم (مو بس المرشحة) عشان يظهر ويُفلتر
-with ThreadPoolExecutor(6) as ex:
-    for r, v in zip(rows, ex.map(lambda r: borrow_avail(r["symbol"]), rows)):
-        r["short_avail"] = v
-print("الشورت متوفر لـ", sum(r["short_avail"] >= 0 for r in rows), "من", len(rows))
+# الشورت المتاح من IB (ملف واحد لكل السوق). السهم غير الموجود بالقائمة = غير قابل للشورت = 0
+ib = load_ib()
+ib_ok = len(ib) > 1000
+for r in rows:
+    if ib_ok:
+        r["short_avail"], r["short_src"] = ib.get(r["symbol"], 0), "ib"
+print("الشورت من IB:", "نجح" if ib_ok else "فشل", "| أسهم بقيمة:", sum(r["short_src"] == "ib" for r in rows))
 
 for r in rows:
     tech = int(r["dd"] >= DD_MIN) + r["ema_ok"] + int(r["rsi_min"] <= RSI_MAX) + r["macd_x"] + int(r["gap"] >= GAP_MIN)
@@ -134,7 +151,7 @@ for r in rows:
             pass
         r["anchor_n"] += int(0 <= r["short_avail"] < SHORT_MAX) + int(r["news_n"] >= 1)
 
-cols = ["symbol","name","country","price","support","stable_days","rebound","tested","confirmed","rsi","split_ratio","split_date","dd","ema_ok","rsi_min","macd_x","gap","short_avail","news_n","anchor_n","rise20","macd_pos"]
+cols = ["symbol","name","country","price","support","stable_days","rebound","tested","confirmed","rsi","split_ratio","split_date","dd","ema_ok","rsi_min","macd_x","gap","short_avail","news_n","anchor_n","rise20","macd_pos","short_src"]
 pd.DataFrame(rows)[cols].to_csv("market.csv", index=False)
 print("تم حفظ market.csv:", len(rows), "سهم | ارتكاز كامل 7/7:", sum(r["anchor_n"] == 7 for r in rows))
 
