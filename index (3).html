@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ماسح دورة الدعم</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f7;--card:#fff;--ink:#0d2b36;--mut:#6b7f88;--line:#dfe7ea;--hero:#0c2d3a;--teal:#14806a;--gold:#c58a1f;--goldbg:#fff8e8;--blue:#2f6fd6;--red:#c4493b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1a21;--card:#10262f;--ink:#e6f0f3;--mut:#8aa1ab;--line:#1f3a45;--goldbg:#2a2412}}
+:root[data-theme="dark"]{--bg:#0a1a21;--card:#10262f;--ink:#e6f0f3;--mut:#8aa1ab;--line:#1f3a45;--goldbg:#2a2412}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;line-height:1.6}
+.hero{background:var(--hero);color:#fff;padding:22px 18px 18px;border-radius:0 0 22px 22px}
+.hero small{color:#7fd6c2}
+.hero h1{margin:2px 0 6px;font-size:24px}
+.hero p{margin:0;color:#a9c0c8;font-size:13px}
+.bar{display:flex;gap:8px;margin-top:14px}
+.bar button,.bar label{flex:1;border:1px solid #2c5361;background:transparent;color:#fff;border-radius:12px;padding:10px;font:inherit;font-size:13px;text-align:center;cursor:pointer}
+.bar .p{background:var(--teal);border-color:var(--teal)}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:14px 14px 6px}
+.tabs button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;cursor:pointer}
+.tabs button.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.tabs b{font-weight:500;opacity:.75;margin-inline-start:6px}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px 14px}
+.filters label{font-size:12px;color:var(--mut);display:block}
+.filters input,.filters select{width:100%;margin-top:2px}
+.filters input[type=range]{accent-color:var(--teal)}
+select,textarea{font:inherit;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:6px}
+#list{padding:6px 14px 40px;display:grid;gap:10px}
+.row{background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--blue);border-radius:14px;padding:12px 14px;cursor:pointer}
+.row.ready{border-inline-start-color:var(--teal)}.row.near{border-inline-start-color:var(--gold)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sym{font-size:20px;font-weight:700;direction:ltr}
+.nm{font-size:12px;color:var(--mut);direction:ltr;text-align:right}
+.score{font-weight:700;font-size:15px;padding:2px 10px;border-radius:10px;background:var(--bg)}
+.near .score{background:var(--goldbg);color:var(--gold)}.ready .score{color:var(--teal)}
+.meta{display:flex;gap:14px;font-size:12px;color:var(--mut);margin-top:8px;flex-wrap:wrap}
+.meta b{color:var(--ink);direction:ltr;display:inline-block}
+.tag{display:inline-block;font-size:11px;background:var(--goldbg);color:var(--gold);padding:1px 8px;border-radius:8px;margin-top:6px;margin-inline-end:4px}
+.empty{text-align:center;color:var(--mut);padding:40px 10px}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;z-index:9}
+.sheet.on{display:flex}
+.panel{background:var(--bg);width:100%;max-height:88%;overflow:auto;border-radius:22px 22px 0 0;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+.ph{background:var(--hero);color:#fff;padding:18px;border-radius:22px 22px 0 0}
+.ph .sym{font-size:26px}.ph .nm{color:#a9c0c8}
+.kp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;font-size:11px;color:#a9c0c8}
+.kp b{display:block;color:#fff;font-size:17px;direction:ltr;text-align:right}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:12px 14px 0;padding:14px}
+.box h3{margin:0 0 4px;font-size:16px}
+.steps{display:flex;justify-content:space-between;margin:12px 0 4px}
+.st{flex:1;text-align:center;font-size:11px;color:var(--mut)}
+.st i{display:grid;place-items:center;width:32px;height:32px;margin:0 auto 4px;border-radius:50%;border:2px solid var(--line);font-style:normal;font-size:13px}
+.st.d i{background:var(--teal);border-color:var(--teal);color:#fff}
+.prog{height:8px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:6px}
+.prog div{height:100%;background:var(--teal)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.grid div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:11px;color:var(--mut)}
+.grid b{display:block;color:var(--ink);font-size:15px;direction:ltr;text-align:right}
+.close{margin:14px;width:calc(100% - 28px);padding:12px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal);font:inherit;cursor:pointer}
+textarea{width:100%;height:150px;direction:ltr;font-size:12px}
+.imp{padding:14px}
+.imp button{margin-top:8px;padding:10px 16px;border:0;border-radius:10px;background:var(--teal);color:#fff;font:inherit;cursor:pointer}
+.note{font-size:12px;color:var(--mut);padding:0 14px}
+</style>
+</head>
+<body>
+<div class="hero">
+  <small>ماسح دورة الدعم</small>
+  <h1>أفضل الفرص في السوق كله</h1>
+  <p>فحص تلقائي لكل الأسهم في القائمة بدون إدخال رموز.</p>
+  <div class="bar">
+    <button class="p" id="btnImp">استيراد بيانات السوق</button>
+    <button id="btnSample">بيانات تجريبية</button>
+  </div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="filters">
+  <div><label>أقصى مسافة عن الدعم: <span id="vd">15</span>%</label><input type="range" id="dist" min="1" max="40" value="15"></div>
+  <div><label>أدنى تقييم: <span id="vs">0</span></label><input type="range" id="minS" min="0" max="100" value="0" step="5"></div>
+  <div><label>الدولة</label><select id="ctry"><option value="">الكل</option></select></div>
+  <div><label>الترتيب</label><select id="sort"><option value="score">الأعلى تقييمًا</option><option value="dist">الأقرب للدعم</option><option value="reb">الأعلى ارتدادًا</option></select></div>
+</div>
+<div class="note" id="src"></div>
+<div id="list"></div>
+
+<div class="sheet" id="sheet"><div class="panel" id="panel"></div></div>
+<div class="sheet" id="imp"><div class="panel">
+  <div class="imp">
+    <h3>استيراد بيانات السوق</h3>
+    <p class="note" style="padding:0">الصق ملف CSV بأعمدة: symbol,name,country,price,support,stable_days,rebound,tested,confirmed,rsi,split_ratio,split_date. القيم tested وconfirmed تكون 1 أو 0. يمكنك تصديرها من أي ماسح أو جدول.</p>
+    <textarea id="csv" placeholder="MSGY,Masonglory Limited,هونغ كونغ,2.08,1.73,3,30.6,1,1,55,1:8,2026-08-11"></textarea>
+    <input type="file" id="file" accept=".csv,.txt" style="margin-top:8px">
+    <button id="go">فحص السوق</button>
+  </div>
+  <button class="close" data-close="imp">إغلاق</button>
+</div></div>
+
+<script>
+var SAMPLE=[
+["MSGY","Masonglory Limited","هونغ كونغ",2.08,1.73,3,30.6,1,1,58,"1:8","2026-08-11"],
+["ZETA","Zeta Network Group","الصين",1.60,1.55,1,12.9,1,1,52,"1:8","2026-07-27"],
+["ELPW","Elong Power Holding Limited","الصين",3.085,3.01,1,8.6,0,0,32,"1:45","2026-08-10"],
+["CPOP","Pop Culture Group Co., Ltd","الصين",3.745,3.45,4,15.9,1,1,95,"","2026-09-14"],
+["AXNT","Axion Tech Ltd","سنغافورة",0.92,0.88,3,11.2,1,0,48,"",""],
+["BRLN","Berlin Optics Inc","ألمانيا",4.10,3.72,5,22.4,1,1,61,"1:10","2026-06-30"],
+["KTRA","Kitra Holdings","أمريكا",1.15,1.12,2,6.1,0,0,40,"",""],
+["NVSI","Novasig Bio","أمريكا",2.60,2.31,3,13.0,0,0,57,"",""],
+["SLMR","Solmar Energy","هونغ كونغ",0.55,0.50,3,10.4,1,0,50,"1:5","2026-08-28"],
+["DRFT","Drift Mobility","الصين",5.30,4.20,6,35.0,1,1,70,"",""],
+["HLIX","Helix Marine","اليابان",1.88,1.85,0,2.0,0,0,28,"",""],
+["PRQM","Parquim Group","أمريكا",3.05,2.98,3,10.8,1,1,54,"1:20","2026-09-01"]
+];
+var DATA=[],tab="best",$=function(i){return document.getElementById(i)};
+var STEPS=["قاع","ثبات 3","ارتداد 10%","اختبار","تأكيد"];
+function calc(r){
+  var d=(r.price-r.support)/r.support*100;
+  var done=[true,r.stable>=3,r.reb>=10,!!r.tested,!!r.confirmed];
+  var n=done.filter(Boolean).length;
+  var s=Math.round(n*14+Math.min(r.reb,10)*1.2+Math.max(0,15-Math.abs(d))*1.0);
+  if(!r.stable&&!r.reb)s=Math.min(s,40);
+  s=Math.min(100,s);
+  r.dist=d;r.done=done;r.n=n;r.score=s;
+  r.stage=n==5?"ready":(s>=75?"near":"early");
+  var m=[];
+  if(r.stable<3)m.push("ينقصه ثبات يومي "+(3-r.stable)+" جلسات");
+  if(r.reb<10)m.push("الارتداد أقل من 10%");
+  if(r.reb>40)m.push("الارتداد فوق النطاق 10–40%");
+  if(r.reb>=10&&!r.tested)m.push("بانتظار اختبار ناجح");
+  if(d>15)m.push("السعر خارج نطاق 15% من الدعم");
+  r.missing=m;
+  return r;
+}
+function parse(t){
+  var out=[];
+  t.split(/\r?\n/).forEach(function(l){
+    if(!l.trim())return;
+    var c=l.split(",").map(function(x){return x.trim()});
+    if(isNaN(parseFloat(c[3])))return;
+    out.push(calc({sym:c[0],name:c[1]||"",ctry:c[2]||"",price:+c[3],support:+c[4],stable:+c[5]||0,reb:+c[6]||0,tested:+c[7]||0,confirmed:+c[8]||0,rsi:+c[9]||0,split:c[10]||"",sdate:c[11]||"",dd:+c[12]||0,emaOk:+c[13]||0,rsiMin:+c[14]||0,macdX:+c[15]||0,gap:+c[16]||0,shortA:(c[17]===undefined||c[17]===""||isNaN(+c[17]))?-1:+c[17],newsN:+c[18]||0,anch:+c[19]||0}));
+  });
+  return out;
+}
+function load(rows,label){
+  DATA=rows.map(function(a){return Array.isArray(a)?calc({sym:a[0],name:a[1],ctry:a[2],price:a[3],support:a[4],stable:a[5],reb:a[6],tested:a[7],confirmed:a[8],rsi:a[9],split:a[10],sdate:a[11]}):a});
+  var cs={};DATA.forEach(function(r){cs[r.ctry]=1});
+  $("ctry").innerHTML='<option value="">الكل</option>'+Object.keys(cs).map(function(c){return "<option>"+c+"</option>"}).join("");
+  $("src").textContent=label+" · "+DATA.length+" سهم";
+  render();
+}
+var TABS=[["best","أفضل الفرص",function(r){return r.stage!="early"}],["split","التقسيم",function(r){return !!r.split}],["rise","الصاعدة",function(r){return r.reb>=10}],["anchor","الارتكاز",function(r){return r.anch>=5}],["all","الكل",function(){return true}]];
+function pass(r){
+  if(r.dist>+$("dist").value)return false;
+  if(r.score<+$("minS").value)return false;
+  if($("ctry").value&&r.ctry!=$("ctry").value)return false;
+  return true;
+}
+function render(){
+  $("vd").textContent=$("dist").value;$("vs").textContent=$("minS").value;
+  var base=DATA.filter(pass);
+  $("tabs").innerHTML=TABS.map(function(t){var c=base.filter(t[2]).length;return '<button class="'+(t[0]==tab?"on":"")+'" data-t="'+t[0]+'">'+t[1]+'<b>'+c+'</b></button>'}).join("");
+  var f=TABS.filter(function(t){return t[0]==tab})[0][2];
+  var s=$("sort").value,rows=base.filter(f);
+  rows.sort(tab=="anchor"&&s=="score"?function(a,b){return b.anch-a.anch||(a.shortA<0?1e12:a.shortA)-(b.shortA<0?1e12:b.shortA)||a.dist-b.dist}:function(a,b){return s=="dist"?a.dist-b.dist:s=="reb"?b.reb-a.reb:b.score-a.score});
+  $("list").innerHTML=rows.length?rows.map(function(r){
+    var i=DATA.indexOf(r),lbl=r.stage=="ready"?"جاهز":r.stage=="near"?"قريب من الجاهزية":"مراقبة مبكرة";
+    return '<div class="row '+r.stage+'" data-i="'+i+'"><div class="top"><div><div class="sym">'+r.sym+'</div><div class="nm">'+r.name+'</div></div><div class="score">'+r.score+'/100</div></div>'+
+    '<div class="meta"><span>'+lbl+'</span><span>السعر <b>$'+r.price+'</b></span><span>الدعم <b>$'+r.support+'</b></span><span>المسافة <b>'+r.dist.toFixed(1)+'%</b></span></div>'+
+    r.missing.map(function(m){return '<span class="tag">'+m+'</span>'}).join("")+(r.anch?'<span class="tag" style="background:var(--bg);color:var(--teal)">ارتكاز '+r.anch+'/7</span>':"")+'</div>';
+  }).join(""):'<div class="empty">لا توجد أسهم تطابق الفلاتر. وسّع المسافة عن الدعم أو خفّض أدنى تقييم.</div>';
+}
+function anchorBox(r){if(!r.anch&&!r.dd)return "";
+var A=[["هبوط ≥ 50% من القمة (نماذج الهبوط مكتملة)",r.dd>=50,r.dd.toFixed(0)+"%"],["السعر تحت EMA30 وEMA50",!!r.emaOk],["تشبع بيعي RSI ≤ 30",r.rsiMin>0&&r.rsiMin<=30,r.rsiMin],["تقاطع MACD إيجابي",!!r.macdX],["فجوة غير مغلقة ≥ 30%",r.gap>=30,r.gap.toFixed(0)+"%"],["شورت متاح أقل من 50 ألف سهم (الأقل أفضل)",r.shortA>=0&&r.shortA<50000,r.shortA<0?"غير متوفر":r.shortA.toLocaleString("en")],["أخبار/إعلانات حديثة",r.newsN>=1,r.newsN]];
+return '<div class="box"><h3>الارتكاز '+r.anch+'/7</h3><div style="font-size:13px;line-height:2">'+A.map(function(a){return '<div>'+(a[1]?"✅":"⬜")+' '+a[0]+(a[2]!==undefined?' <b style="direction:ltr;display:inline-block">('+a[2]+')</b>':"")+'</div>'}).join("")+'</div></div>';}
+function open_(i){
+  var r=DATA[i];
+  $("panel").innerHTML='<div class="ph"><div class="sym">'+r.sym+'</div><div class="nm">'+r.name+' · '+r.ctry+'</div><div class="kp"><div>السعر الحالي<b>$'+r.price+'</b></div><div>الدعم المعتمد<b>$'+r.support+'</b></div><div>المسافة عن الدعم<b>'+r.dist.toFixed(1)+'%</b></div></div></div>'+
+  '<div class="box"><h3>دورة الدعم</h3><div class="steps">'+STEPS.map(function(s,k){return '<div class="st '+(r.done[k]?"d":"")+'"><i>'+(r.done[k]?"✓":k+1)+'</i>'+s+'</div>'}).join("")+'</div>'+
+  '<div style="font-size:12px;color:var(--mut);display:flex;justify-content:space-between"><span>تقدم الارتداد المطلوب</span><b style="direction:ltr;color:var(--ink)">'+r.reb+'% / 10%</b></div><div class="prog"><div style="width:'+Math.min(100,r.reb*10)+'%"></div></div></div>'+
+  '<div class="box"><h3>بيانات التقسيم والتحليل</h3><div class="grid"><div>نسبة التقسيم<b>'+(r.split||"—")+'</b></div><div>تاريخ التقسيم<b>'+(r.sdate||"—")+'</b></div><div>RSI<b>'+(r.rsi||"—")+'</b></div><div>أيام الثبات<b>'+r.stable+'</b></div></div></div>'+
+  anchorBox(r)+'<button class="close" data-close="sheet">العودة لقائمة الأسهم</button>';
+  $("sheet").classList.add("on");
+}
+document.addEventListener("click",function(e){
+  var t=e.target.closest("[data-t]");if(t){tab=t.dataset.t;render();return}
+  var r=e.target.closest("[data-i]");if(r){open_(+r.dataset.i);return}
+  var c=e.target.closest("[data-close]");if(c){$(c.dataset.close).classList.remove("on");return}
+  if(e.target.classList.contains("sheet"))e.target.classList.remove("on");
+});
+["dist","minS","ctry","sort"].forEach(function(i){$(i).addEventListener("input",render)});
+$("btnImp").onclick=function(){$("imp").classList.add("on")};
+$("btnSample").onclick=function(){load(SAMPLE,"بيانات تجريبية")};
+$("file").onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){$("csv").value=rd.result};rd.readAsText(f)};
+$("go").onclick=function(){
+  var rows=parse($("csv").value);
+  if(!rows.length){alert("لم أجد صفوفًا صالحة. تأكد أن العمود الرابع (price) رقم.");return}
+  try{localStorage.setItem("mkt",$("csv").value)}catch(e){}
+  $("imp").classList.remove("on");load(rows,"بياناتك المستوردة");
+};
+(function(){
+  fetch("market.csv?t="+Date.now()).then(function(r){if(!r.ok)throw 0;
+    var d=r.headers.get("last-modified");return r.text().then(function(t){return [t,d]})})
+  .then(function(a){var rows=parse(a[0]);if(!rows.length)throw 0;
+    load(rows,"تحديث تلقائي"+(a[1]?" · "+new Date(a[1]).toLocaleDateString("ar"):""))})
+  .catch(function(){var s=null;try{s=localStorage.getItem("mkt")}catch(e){}
+    var rows=s?parse(s):[];
+    rows.length?load(rows,"آخر بيانات مستوردة"):load(SAMPLE,"بيانات تجريبية")});
+})();
+</script>
+</body>
+</html>
