@@ -2,6 +2,7 @@
 # يفحص كل أسهم ناسداك/NYSE بين 1 و5 دولار ويطلع market.csv (دورة الدعم + الارتكاز)
 import io, urllib.request
 import json, time
+from concurrent.futures import ThreadPoolExecutor
 import pandas as pd, numpy as np, yfinance as yf
 
 # ===== حدود الارتكاز (غيّرها كما تريد) =====
@@ -99,20 +100,29 @@ for b in batches(cands, 100):
             macd = ema(c, 12) - ema(c, 26)
             dif = (macd - ema(macd, 9)).tail(4)
             macd_x = int(dif.iloc[-1] > 0 and (dif.iloc[:-1] <= 0).any())
+            macd_pos = int(dif.iloc[-1] > 0)
             op, hi, lo = df["Open"].values, df["High"].values, df["Low"].values
             gap = 0.0
             for k in range(1, len(df)):
                 if op[k] < lo[k - 1] * 0.98 and hi[k:].max() < lo[k - 1]:
                     gap = max(gap, (lo[k - 1] - price) / price * 100)
+            l20, h20 = df["Low"].tail(20).values, df["High"].tail(20).values
+            rise20 = float(((h20 - np.minimum.accumulate(l20)) / np.minimum.accumulate(l20)).max() * 100)
             rows.append(dict(symbol=s, name=names[s], country="أمريكا", price=round(price, 3), support=round(sup, 3),
                              stable_days=stable, rebound=round(reb, 1), tested=tested, confirmed=confirmed,
                              rsi=round(float(rs.iloc[-1]), 1), split_ratio=split_ratio, split_date=split_date,
                              dd=round(dd, 1), ema_ok=ema_ok, rsi_min=round(rsi_min, 1), macd_x=macd_x,
-                             gap=round(gap, 1), short_avail=-1, news_n=0))
+                             gap=round(gap, 1), short_avail=-1, news_n=0, rise20=round(rise20, 1), macd_pos=macd_pos))
         except Exception:
             pass
 
 # الشورت والأخبار: فقط للأسهم اللي حققت الشروط الفنية الخمسة (توفيرًا للوقت)
+# الشورت المتاح لكل الأسهم (مو بس المرشحة) عشان يظهر ويُفلتر
+with ThreadPoolExecutor(6) as ex:
+    for r, v in zip(rows, ex.map(lambda r: borrow_avail(r["symbol"]), rows)):
+        r["short_avail"] = v
+print("الشورت متوفر لـ", sum(r["short_avail"] >= 0 for r in rows), "من", len(rows))
+
 for r in rows:
     tech = int(r["dd"] >= DD_MIN) + r["ema_ok"] + int(r["rsi_min"] <= RSI_MAX) + r["macd_x"] + int(r["gap"] >= GAP_MIN)
     r["anchor_n"] = tech
@@ -122,10 +132,9 @@ for r in rows:
             r["news_n"] = len(t.news or [])
         except Exception:
             pass
-        r["short_avail"] = borrow_avail(r["symbol"])
-        time.sleep(0.5)
         r["anchor_n"] += int(0 <= r["short_avail"] < SHORT_MAX) + int(r["news_n"] >= 1)
 
-pd.DataFrame(rows).to_csv("market.csv", index=False)
+cols = ["symbol","name","country","price","support","stable_days","rebound","tested","confirmed","rsi","split_ratio","split_date","dd","ema_ok","rsi_min","macd_x","gap","short_avail","news_n","anchor_n","rise20","macd_pos"]
+pd.DataFrame(rows)[cols].to_csv("market.csv", index=False)
 print("تم حفظ market.csv:", len(rows), "سهم | ارتكاز كامل 7/7:", sum(r["anchor_n"] == 7 for r in rows))
 
